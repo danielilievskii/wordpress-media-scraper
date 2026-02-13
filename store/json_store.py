@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Iterable, List, Dict, Any, Set
 
 from .base_store import BaseStore
-from scraper import Article
+from vezilka_schemas import Record
 
 logger = logging.getLogger(__name__)
 
@@ -32,16 +32,14 @@ class JSONFileStore(BaseStore):
             logger.warning("File %s is empty or corrupted. Returning empty list.", self.records_file_path)
             return []
 
-    def save_articles(self, articles: Iterable[Article]) -> None:
+    def save_articles(self, articles: List[Record]) -> None:
         """Append new articles to the JSON file and update seen IDs."""
 
-        articles_list = list(articles)
-
-        if not articles_list:
+        if not articles:
             logger.info("No articles to save")
             return
 
-        article_dicts = [record.to_dict() for record in articles_list]
+        article_dicts = [record.to_dict() for record in articles]
 
         existing_articles = self.load_all_articles()
         existing_articles.extend(article_dicts)
@@ -49,9 +47,9 @@ class JSONFileStore(BaseStore):
         with self.records_file_path.open("w", encoding="utf-8") as f:
             json.dump(existing_articles, f, indent=2, ensure_ascii=False)
 
-        logger.info("Added %d new articles (total: %d)", len(articles_list), len(existing_articles))
+        logger.info("Added %d new articles (total: %d)", len(articles), len(existing_articles))
 
-        new_ids = {article.id for article in articles_list}
+        new_ids = {article.id for article in articles}
         self.save_seen_ids(new_ids)
 
     def save_seen_ids(self, ids: Set[str]) -> None:

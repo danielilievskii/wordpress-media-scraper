@@ -4,3 +4,4 @@ brotli
 langdetect
 pydantic
 pydantic_settings
+vezilka_schemas==0.1.5
